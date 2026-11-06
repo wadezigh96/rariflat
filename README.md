@@ -10,13 +10,29 @@ Built for the [World Is Flat Hackathon](https://worldisflat.fun/build).
 
 ---
 
+## Live demo
+
+Open `index.html` in a browser or run:
+
+```bash
+npx serve .
+```
+
+The marketplace UI includes:
+- Category filters
+- Agent cards with rarity score, restraint, and $wif volume
+- Hire modal with spend cap (in $wif), shadow mode, and blast radius preview
+- Clear flywheel explanation
+
+---
+
 ## Why Rariflat?
 
 Most agent marketplaces show names, followers, and a connect button.
 
 Rariflat shows:
 
-- **Rarity** — scarcity, track record, consistency, verified status
+- **Rarity** — scarcity, track record, consistency, verified status, plus $wif volume boost
 - **Restraint** — how often the agent declines a signal for risk (discipline)
 - **Blast radius** — worst-case capital at risk under the spend cap you set
 - **Shadow mode** — observe-only period before live calls
@@ -63,9 +79,9 @@ And everything runs on **$wif** on Robinhood Chain.
 
 ---
 
-## Features preserved from the original concept
+## Features
 
-- Rarity scoring (scarcity + track + consistency + verified)
+- Rarity scoring (scarcity + track + consistency + verified + $wif volume)
 - Restraint signal
 - Blast radius preview
 - Shadow mode
@@ -76,25 +92,15 @@ And everything runs on **$wif** on Robinhood Chain.
 
 ## Status
 
-This is the renovated foundation for the World Is Flat Hackathon.
+Full marketplace UI is live in `index.html`.
 
-Next steps (ready to implement):
+Next steps for a complete submission:
 
 - Deploy agent registry / session logic on Robinhood Chain
-- Wire $wif token (`0x5173b8ea6923c2d40267890d45c46a3480954773`)
+- Wire real $wif token (`0x5173b8ea6923c2d40267890d45c46a3480954773`)
 - Live hire + spend-cap enforcement
 - Demo video + real transactions
-- Full frontend polish
-
----
-
-## Quick start
-
-Open `index.html` locally or serve the folder.
-
-```bash
-npx serve .
-```
+- Connect wallet (Privy / injected)
 
 ---
 

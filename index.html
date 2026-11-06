@@ -3,57 +3,266 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rariflat — Rarity Agent Marketplace on Robinhood Chain</title>
+  <title>Rariflat — Rarity Agent Marketplace</title>
   <style>
     :root {
-      --bg: #0a0c0a;
-      --card: #121512;
+      --bg: #070907;
+      --surface: #0e110e;
+      --card: #121612;
+      --card-hover: #181d18;
+      --border: #1e261e;
       --accent: #00ff9d;
+      --accent-dim: #00cc7a;
       --text: #e8f0e8;
-      --muted: #8a9a8a;
+      --muted: #7a8a7a;
+      --danger: #ff5c5c;
+      --warning: #ffb020;
     }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
-    header { padding: 2rem; border-bottom: 1px solid #222; text-align: center; }
-    h1 { margin: 0; font-size: 2.5rem; letter-spacing: -0.03em; }
-    .tag { color: var(--accent); font-weight: 600; }
-    .sub { color: var(--muted); margin-top: 0.5rem; }
-    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 1.2rem; }
-    .card h3 { margin: 0 0 0.5rem; }
-    .meta { color: var(--muted); font-size: 0.85rem; }
-    .wif { color: var(--accent); font-weight: 600; }
-    .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.9rem; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }
+    a { color: var(--accent); text-decoration: none; }
+
+    header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; background: rgba(7,9,7,0.92); backdrop-filter: blur(10px); z-index: 20;
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
+    .logo span { color: var(--accent); }
+    .header-meta { font-size: 0.85rem; color: var(--muted); }
+    .header-meta .wif { color: var(--accent); font-weight: 600; }
+
+    .hero { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    .hero h1 { margin: 0 0 0.5rem; font-size: 2.4rem; letter-spacing: -0.03em; }
+    .hero p { color: var(--muted); max-width: 620px; margin: 0 auto; }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; padding: 0.5rem 1rem 1.5rem; }
+    .filter-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 0.4rem 0.9rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem;
+    }
+    .filter-btn.active, .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 1rem 3rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.15rem; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .card:hover { background: var(--card-hover); border-color: #2a332a; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; }
+    .card h3 { margin: 0; font-size: 1.1rem; }
+    .badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #1a221a; color: var(--muted); }
+    .badge.verified { background: #0d2a1a; color: var(--accent); }
+    .card p { margin: 0.4rem 0 0.8rem; font-size: 0.9rem; color: #c5d0c5; }
+    .metrics { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .metrics strong { color: var(--text); }
+    .wif-vol { color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+    .rarity-bar { height: 4px; background: #1a221a; border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
+    .rarity-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 100; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 1.4rem;
+    }
+    .modal h2 { margin: 0 0 0.4rem; }
+    .modal .cat { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .field input, .field select {
+      width: 100%; background: #0a0c0a; border: 1px solid var(--border); color: var(--text);
+      padding: 0.55rem 0.7rem; border-radius: 8px; font-size: 0.95rem;
+    }
+    .signal { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0; border-bottom: 1px solid #1a1f1a; }
+    .signal .val { color: var(--accent); }
+    .blast { background: #1a120a; border: 1px solid #3a2a12; border-radius: 8px; padding: 0.7rem; margin: 0.8rem 0; font-size: 0.85rem; }
+    .btn {
+      background: var(--accent); color: #041208; border: none; padding: 0.7rem 1.2rem;
+      border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.95rem;
+    }
+    .btn:hover { background: #33ffb0; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 0.5rem; }
+    .close { float: right; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; }
+
+    .flywheel {
+      margin-top: 2.5rem; padding: 1.2rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; text-align: center;
+    }
+    .flywheel h3 { margin: 0 0 0.5rem; }
+    .flywheel p { color: var(--muted); margin: 0; font-size: 0.9rem; }
+
+    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
   <header>
-    <h1>Rariflat</h1>
-    <div class="sub">Rarity-ranked agents on <span class="tag">Robinhood Chain</span> · powered by <span class="wif">$wif</span></div>
+    <div class="logo">Rari<span>flat</span></div>
+    <div class="header-meta">Robinhood Chain · <span class="wif">$wif</span></div>
   </header>
+
+  <div class="hero">
+    <h1>Hire by rarity.<br>Cap by $wif.</h1>
+    <p>Rarity-ranked AI agents on Robinhood Chain. Compare restraint and blast radius before you activate. Usage feeds the $wif flywheel.</p>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
   <div class="container">
-    <p>Hire by rarity. Cap spend in $wif. Compare restraint and blast radius before you activate.</p>
-    <div id="grid" class="grid"></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="flywheel">
+      <h3>Flywheel</h3>
+      <p>Hire an agent → spend or lock $wif → agent rarity & visibility rises → more users return → more $wif activity on Robinhood Chain.</p>
+    </div>
   </div>
-  <div class="footer">
-    Built for World Is Flat Hackathon · $wif 0x5173b8ea6923c2d40267890d45c46a3480954773<br>
-    Open agents-data.js and app logic to extend.
+
+  <footer>
+    Rariflat · Built for World Is Flat Hackathon<br>
+    $wif 0x5173b8ea6923c2d40267890d45c46a3480954773
+  </footer>
+
+  <!-- Hire Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <button class="close" onclick="closeModal()">&times;</button>
+      <h2 id="m-name"></h2>
+      <div class="cat" id="m-cat"></div>
+      <p id="m-desc" style="font-size:0.9rem; color:#c5d0c5;"></p>
+
+      <div class="signal"><span>Rarity</span><span class="val" id="m-rarity"></span></div>
+      <div class="signal"><span>Restraint</span><span class="val" id="m-restraint"></span></div>
+      <div class="signal"><span>$wif volume</span><span class="val" id="m-vol"></span></div>
+      <div class="signal"><span id="m-keylabel"></span><span class="val" id="m-keyval"></span></div>
+
+      <div class="field">
+        <label>Spend cap ($wif)</label>
+        <input type="number" id="spend-cap" value="100" min="1" step="1">
+      </div>
+      <div class="field">
+        <label>Shadow mode (days)</label>
+        <select id="shadow">
+          <option value="0">Off</option>
+          <option value="1" selected>1 day</option>
+          <option value="3">3 days</option>
+          <option value="7">7 days</option>
+        </select>
+      </div>
+
+      <div class="blast" id="blast">
+        Blast radius: up to <strong id="blast-val">100</strong> $wif at risk under this cap.
+      </div>
+
+      <button class="btn" onclick="hire()">Hire with $wif</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
   </div>
+
   <script src="agents-data.js"></script>
   <script>
-    const grid = document.getElementById('grid');
-    AGENTS.forEach(a => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <h3>${a.name}</h3>
-        <div class="meta">${a.cat} · ${a.verified ? 'Verified' : 'Unverified'}</div>
-        <p>${a.desc}</p>
-        <div class="wif">$wif volume: ${(a.wifVolume/1000).toFixed(0)}k</div>
-        <div class="meta">${a.keyLabel}: ${a.keyValue}</div>
-      `;
-      grid.appendChild(card);
+    let currentFilter = 'All';
+    let selectedAgent = null;
+
+    function rarityScore(a) {
+      const scarcity = Math.max(0, 100 - a.peerCount * 5);
+      const track = Math.min(100, a.uptimeDays / 6);
+      const consistency = a.successRate;
+      const verified = a.verified ? 100 : 40;
+      const volBoost = Math.min(30, Math.log10(Math.max(1, a.wifVolume)) * 4);
+      return Math.round(0.28*scarcity + 0.25*track + 0.22*consistency + 0.15*verified + volBoost);
+    }
+
+    function restraintScore(a) {
+      return Math.round(40 + (a.successRate - 75) * 1.2 + (a.verified ? 8 : 0));
+    }
+
+    function renderFilters() {
+      const el = document.getElementById('filters');
+      el.innerHTML = CATEGORIES.map(c =>
+        `<button class="filter-btn ${c===currentFilter?'active':''}" onclick="setFilter('${c}')">${c}</button>`
+      ).join('');
+    }
+
+    function setFilter(c) {
+      currentFilter = c;
+      renderFilters();
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      const list = AGENTS.filter(a => currentFilter === 'All' || a.cat === currentFilter);
+      grid.innerHTML = list.map(a => {
+        const r = rarityScore(a);
+        const rest = restraintScore(a);
+        return `
+          <div class="card" onclick="openModal('${a.name}')">
+            <div class="card-header">
+              <h3>${a.name}</h3>
+              <span class="badge ${a.verified?'verified':''}">${a.verified?'Verified':'Unverified'}</span>
+            </div>
+            <p>${a.desc}</p>
+            <div class="metrics">
+              <span>Rarity <strong>${r}</strong></span>
+              <span>Restraint <strong>${rest}</strong></span>
+            </div>
+            <div class="wif-vol">$wif vol ${(a.wifVolume/1000).toFixed(0)}k</div>
+            <div class="meta" style="font-size:0.8rem; color:var(--muted); margin-top:0.3rem;">${a.keyLabel}: ${a.keyValue}</div>
+            <div class="rarity-bar"><div class="rarity-fill" style="width:${Math.min(100,r)}%"></div></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openModal(name) {
+      selectedAgent = AGENTS.find(a => a.name === name);
+      if (!selectedAgent) return;
+      const a = selectedAgent;
+      document.getElementById('m-name').textContent = a.name;
+      document.getElementById('m-cat').textContent = a.cat + (a.verified ? ' · Verified' : '');
+      document.getElementById('m-desc').textContent = a.desc;
+      document.getElementById('m-rarity').textContent = rarityScore(a);
+      document.getElementById('m-restraint').textContent = restraintScore(a);
+      document.getElementById('m-vol').textContent = (a.wifVolume/1000).toFixed(0) + 'k';
+      document.getElementById('m-keylabel').textContent = a.keyLabel;
+      document.getElementById('m-keyval').textContent = a.keyValue;
+      document.getElementById('spend-cap').value = 100;
+      updateBlast();
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    function updateBlast() {
+      const cap = parseInt(document.getElementById('spend-cap').value) || 0;
+      document.getElementById('blast-val').textContent = cap;
+    }
+    document.getElementById('spend-cap').addEventListener('input', updateBlast);
+
+    function hire() {
+      const cap = document.getElementById('spend-cap').value;
+      const shadow = document.getElementById('shadow').value;
+      alert(`Hire simulated for ${selectedAgent.name}\n\nSpend cap: ${cap} $wif\nShadow mode: ${shadow} days\n\nIn production this would create an on-chain session on Robinhood Chain with $wif enforcement.`);
+      closeModal();
+    }
+
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target.id === 'modal') closeModal();
     });
+
+    renderFilters();
+    renderGrid();
   </script>
 </body>
 </html>
