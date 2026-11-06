@@ -15,99 +15,140 @@
       --accent-dim: #00cc7a;
       --text: #e8f0e8;
       --muted: #7a8a7a;
-      --danger: #ff5c5c;
-      --warning: #ffb020;
+      --gold: #ffd166;
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }
     a { color: var(--accent); text-decoration: none; }
 
     header {
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1.5rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky; top: 0; background: rgba(7,9,7,0.92); backdrop-filter: blur(10px); z-index: 20;
+      position: sticky; top: 0; background: rgba(7,9,7,0.94); backdrop-filter: blur(12px); z-index: 20;
     }
-    .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
+    .logo { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.03em; }
     .logo span { color: var(--accent); }
-    .header-meta { font-size: 0.85rem; color: var(--muted); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-meta { font-size: 0.82rem; color: var(--muted); }
     .header-meta .wif { color: var(--accent); font-weight: 600; }
 
-    .hero { text-align: center; padding: 2.5rem 1rem 1.5rem; }
-    .hero h1 { margin: 0 0 0.5rem; font-size: 2.4rem; letter-spacing: -0.03em; }
-    .hero p { color: var(--muted); max-width: 620px; margin: 0 auto; }
-
-    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; padding: 0.5rem 1rem 1.5rem; }
-    .filter-btn {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      padding: 0.4rem 0.9rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem;
+    .wallet-btn {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      padding: 0.4rem 0.9rem; border-radius: 999px; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+      transition: all 0.15s;
     }
-    .filter-btn.active, .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .wallet-btn:hover, .wallet-btn.connected { background: var(--accent); color: #041208; }
+    .wallet-btn.connected { border-color: var(--accent); }
+
+    .hero { text-align: center; padding: 2.2rem 1rem 1.2rem; }
+    .hero h1 { margin: 0 0 0.5rem; font-size: 2.3rem; letter-spacing: -0.03em; }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 auto; }
+
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: space-between;
+      align-items: center; padding: 0.4rem 1rem 1rem; max-width: 1180px; margin: 0 auto;
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .filter-btn, .sort-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 0.35rem 0.85rem; border-radius: 999px; cursor: pointer; font-size: 0.82rem;
+      transition: all 0.15s;
+    }
+    .filter-btn.active, .filter-btn:hover,
+    .sort-btn.active, .sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sort-group { display: flex; gap: 0.4rem; align-items: center; }
+    .sort-label { font-size: 0.75rem; color: var(--muted); }
 
     .container { max-width: 1180px; margin: 0 auto; padding: 0 1rem 3rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 1.15rem; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      padding: 1.1rem; cursor: pointer; transition: all 0.2s ease;
+      position: relative; overflow: hidden;
     }
-    .card:hover { background: var(--card-hover); border-color: #2a332a; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; }
-    .card h3 { margin: 0; font-size: 1.1rem; }
-    .badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #1a221a; color: var(--muted); }
+    .card:hover {
+      background: var(--card-hover); border-color: #2a332a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,255,157,0.06);
+    }
+    .rank {
+      position: absolute; top: 0.7rem; right: 0.7rem;
+      background: #1a221a; color: var(--gold); font-size: 0.7rem; font-weight: 700;
+      padding: 0.15rem 0.45rem; border-radius: 6px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; padding-right: 2.2rem; }
+    .card h3 { margin: 0; font-size: 1.08rem; }
+    .badge { font-size: 0.68rem; padding: 0.12rem 0.45rem; border-radius: 999px; background: #1a221a; color: var(--muted); }
     .badge.verified { background: #0d2a1a; color: var(--accent); }
-    .card p { margin: 0.4rem 0 0.8rem; font-size: 0.9rem; color: #c5d0c5; }
-    .metrics { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .card p { margin: 0.35rem 0 0.7rem; font-size: 0.88rem; color: #c5d0c5; }
+    .metrics { display: flex; gap: 0.9rem; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
     .metrics strong { color: var(--text); }
-    .wif-vol { color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+    .wif-vol { color: var(--accent); font-weight: 600; font-size: 0.82rem; }
     .rarity-bar { height: 4px; background: #1a221a; border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
-    .rarity-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; }
+    .rarity-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; transition: width 0.4s ease; }
 
-    /* Modal */
     .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72);
       z-index: 100; align-items: center; justify-content: center; padding: 1rem;
     }
-    .modal-overlay.open { display: flex; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .modal {
       background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
       width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 1.4rem;
+      animation: slideUp 0.25s ease;
     }
-    .modal h2 { margin: 0 0 0.4rem; }
-    .modal .cat { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
-    .field { margin-bottom: 1rem; }
-    .field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal h2 { margin: 0 0 0.3rem; }
+    .modal .cat { color: var(--muted); font-size: 0.88rem; margin-bottom: 0.8rem; }
+    .field { margin-bottom: 0.9rem; }
+    .field label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.25rem; }
     .field input, .field select {
       width: 100%; background: #0a0c0a; border: 1px solid var(--border); color: var(--text);
-      padding: 0.55rem 0.7rem; border-radius: 8px; font-size: 0.95rem;
+      padding: 0.5rem 0.65rem; border-radius: 8px; font-size: 0.92rem;
     }
-    .signal { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0; border-bottom: 1px solid #1a1f1a; }
+    .signal { display: flex; justify-content: space-between; font-size: 0.84rem; padding: 0.35rem 0; border-bottom: 1px solid #1a1f1a; }
     .signal .val { color: var(--accent); }
-    .blast { background: #1a120a; border: 1px solid #3a2a12; border-radius: 8px; padding: 0.7rem; margin: 0.8rem 0; font-size: 0.85rem; }
+    .blast { background: #1a120a; border: 1px solid #3a2a12; border-radius: 8px; padding: 0.65rem; margin: 0.7rem 0; font-size: 0.84rem; }
     .btn {
-      background: var(--accent); color: #041208; border: none; padding: 0.7rem 1.2rem;
-      border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.95rem;
+      background: var(--accent); color: #041208; border: none; padding: 0.65rem 1.1rem;
+      border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.92rem;
+      transition: background 0.15s;
     }
     .btn:hover { background: #33ffb0; }
-    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 0.5rem; }
+    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 0.45rem; }
     .close { float: right; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; }
 
     .flywheel {
-      margin-top: 2.5rem; padding: 1.2rem; background: var(--surface); border: 1px solid var(--border);
+      margin-top: 2.2rem; padding: 1.1rem; background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px; text-align: center;
     }
-    .flywheel h3 { margin: 0 0 0.5rem; }
-    .flywheel p { color: var(--muted); margin: 0; font-size: 0.9rem; }
+    .flywheel h3 { margin: 0 0 0.4rem; }
+    .flywheel p { color: var(--muted); margin: 0; font-size: 0.88rem; }
 
-    footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); }
+    footer { text-align: center; padding: 1.4rem; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); }
+
+    .wallet-modal .modal { max-width: 400px; }
+    .wallet-option {
+      display: block; width: 100%; text-align: left; background: #0a0c0a; border: 1px solid var(--border);
+      color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px; margin-bottom: 0.5rem; cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .wallet-option:hover { border-color: var(--accent); }
+    .wallet-option small { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 0.15rem; }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">Rari<span>flat</span></div>
-    <div class="header-meta">Robinhood Chain · <span class="wif">$wif</span></div>
+    <div class="header-right">
+      <div class="header-meta">Robinhood Chain · <span class="wif">$wif</span></div>
+      <button class="wallet-btn" id="walletBtn" onclick="openWallet()">Connect Wallet</button>
+    </div>
   </header>
 
   <div class="hero">
@@ -115,7 +156,15 @@
     <p>Rarity-ranked AI agents on Robinhood Chain. Compare restraint and blast radius before you activate. Usage feeds the $wif flywheel.</p>
   </div>
 
-  <div class="filters" id="filters"></div>
+  <div class="controls">
+    <div class="filters" id="filters"></div>
+    <div class="sort-group">
+      <span class="sort-label">Sort:</span>
+      <button class="sort-btn active" data-sort="rarity" onclick="setSort('rarity')">Rarity</button>
+      <button class="sort-btn" data-sort="volume" onclick="setSort('volume')">$wif Volume</button>
+      <button class="sort-btn" data-sort="restraint" onclick="setSort('restraint')">Restraint</button>
+    </div>
+  </div>
 
   <div class="container">
     <div class="grid" id="grid"></div>
@@ -128,7 +177,7 @@
 
   <footer>
     Rariflat · Built for World Is Flat Hackathon<br>
-    $wif 0x5173b8ea6923c2d40267890d45c46a3480954773
+    $wif 0x5173b8ea6923c2d40267890d45c46a3480954773 · Session contract skeleton in <code>contracts/RariflatSession.sol</code>
   </footer>
 
   <!-- Hire Modal -->
@@ -137,7 +186,7 @@
       <button class="close" onclick="closeModal()">&times;</button>
       <h2 id="m-name"></h2>
       <div class="cat" id="m-cat"></div>
-      <p id="m-desc" style="font-size:0.9rem; color:#c5d0c5;"></p>
+      <p id="m-desc" style="font-size:0.88rem; color:#c5d0c5;"></p>
 
       <div class="signal"><span>Rarity</span><span class="val" id="m-rarity"></span></div>
       <div class="signal"><span>Restraint</span><span class="val" id="m-restraint"></span></div>
@@ -167,10 +216,33 @@
     </div>
   </div>
 
+  <!-- Wallet Modal -->
+  <div class="modal-overlay wallet-modal" id="walletModal">
+    <div class="modal">
+      <button class="close" onclick="closeWallet()">&times;</button>
+      <h2>Connect Wallet</h2>
+      <p style="color:var(--muted); font-size:0.88rem; margin-top:0.2rem;">Simulation for demo. On Robinhood Chain this would open Privy or an injected wallet.</p>
+      <button class="wallet-option" onclick="connectSim('Privy')">
+        Privy (embedded)
+        <small>Email / social login → embedded wallet</small>
+      </button>
+      <button class="wallet-option" onclick="connectSim('Injected')">
+        Injected Wallet
+        <small>MetaMask / Rabby / browser wallet</small>
+      </button>
+      <button class="wallet-option" onclick="connectSim('WalletConnect')">
+        WalletConnect
+        <small>Mobile wallet QR</small>
+      </button>
+    </div>
+  </div>
+
   <script src="agents-data.js"></script>
   <script>
     let currentFilter = 'All';
+    let currentSort = 'rarity';
     let selectedAgent = null;
+    let wallet = null;
 
     function rarityScore(a) {
       const scarcity = Math.max(0, 100 - a.peerCount * 5);
@@ -182,7 +254,16 @@
     }
 
     function restraintScore(a) {
-      return Math.round(40 + (a.successRate - 75) * 1.2 + (a.verified ? 8 : 0));
+      return Math.round(Math.max(20, Math.min(98, 40 + (a.successRate - 75) * 1.2 + (a.verified ? 8 : 0))));
+    }
+
+    function getSorted() {
+      let list = AGENTS.filter(a => currentFilter === 'All' || a.cat === currentFilter);
+      list = list.map(a => ({ ...a, _rarity: rarityScore(a), _restraint: restraintScore(a) }));
+      if (currentSort === 'rarity') list.sort((a,b) => b._rarity - a._rarity);
+      else if (currentSort === 'volume') list.sort((a,b) => b.wifVolume - a.wifVolume);
+      else if (currentSort === 'restraint') list.sort((a,b) => b._restraint - a._restraint);
+      return list;
     }
 
     function renderFilters() {
@@ -198,26 +279,31 @@
       renderGrid();
     }
 
+    function setSort(s) {
+      currentSort = s;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === s));
+      renderGrid();
+    }
+
     function renderGrid() {
       const grid = document.getElementById('grid');
-      const list = AGENTS.filter(a => currentFilter === 'All' || a.cat === currentFilter);
-      grid.innerHTML = list.map(a => {
-        const r = rarityScore(a);
-        const rest = restraintScore(a);
+      const list = getSorted();
+      grid.innerHTML = list.map((a, i) => {
         return `
           <div class="card" onclick="openModal('${a.name}')">
+            <div class="rank">#${i+1}</div>
             <div class="card-header">
               <h3>${a.name}</h3>
               <span class="badge ${a.verified?'verified':''}">${a.verified?'Verified':'Unverified'}</span>
             </div>
             <p>${a.desc}</p>
             <div class="metrics">
-              <span>Rarity <strong>${r}</strong></span>
-              <span>Restraint <strong>${rest}</strong></span>
+              <span>Rarity <strong>${a._rarity}</strong></span>
+              <span>Restraint <strong>${a._restraint}</strong></span>
             </div>
             <div class="wif-vol">$wif vol ${(a.wifVolume/1000).toFixed(0)}k</div>
-            <div class="meta" style="font-size:0.8rem; color:var(--muted); margin-top:0.3rem;">${a.keyLabel}: ${a.keyValue}</div>
-            <div class="rarity-bar"><div class="rarity-fill" style="width:${Math.min(100,r)}%"></div></div>
+            <div style="font-size:0.78rem; color:var(--muted); margin-top:0.25rem;">${a.keyLabel}: ${a.keyValue}</div>
+            <div class="rarity-bar"><div class="rarity-fill" style="width:${Math.min(100,a._rarity)}%"></div></div>
           </div>
         `;
       }).join('');
@@ -251,14 +337,38 @@
     document.getElementById('spend-cap').addEventListener('input', updateBlast);
 
     function hire() {
+      if (!wallet) {
+        alert('Connect a wallet first.');
+        openWallet();
+        return;
+      }
       const cap = document.getElementById('spend-cap').value;
       const shadow = document.getElementById('shadow').value;
-      alert(`Hire simulated for ${selectedAgent.name}\n\nSpend cap: ${cap} $wif\nShadow mode: ${shadow} days\n\nIn production this would create an on-chain session on Robinhood Chain with $wif enforcement.`);
+      alert(`Session created (simulated)\n\nAgent: ${selectedAgent.name}\nWallet: ${wallet.type} · ${wallet.address}\nSpend cap: ${cap} $wif\nShadow mode: ${shadow} days\n\nOn Robinhood Chain this would call RariflatSession.createSession() and require $wif allowance.`);
       closeModal();
+    }
+
+    function openWallet() {
+      document.getElementById('walletModal').classList.add('open');
+    }
+    function closeWallet() {
+      document.getElementById('walletModal').classList.remove('open');
+    }
+
+    function connectSim(type) {
+      const addr = '0x' + Math.random().toString(16).slice(2, 10) + '...' + Math.random().toString(16).slice(2, 6);
+      wallet = { type, address: addr };
+      const btn = document.getElementById('walletBtn');
+      btn.textContent = addr;
+      btn.classList.add('connected');
+      closeWallet();
     }
 
     document.getElementById('modal').addEventListener('click', e => {
       if (e.target.id === 'modal') closeModal();
+    });
+    document.getElementById('walletModal').addEventListener('click', e => {
+      if (e.target.id === 'walletModal') closeWallet();
     });
 
     renderFilters();

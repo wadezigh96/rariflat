@@ -18,11 +18,14 @@ Open `index.html` in a browser or run:
 npx serve .
 ```
 
-The marketplace UI includes:
-- Category filters
-- Agent cards with rarity score, restraint, and $wif volume
-- Hire modal with spend cap (in $wif), shadow mode, and blast radius preview
-- Clear flywheel explanation
+### Current features
+- Full marketplace UI with category filters
+- Sorting by **Rarity**, **$wif Volume**, or **Restraint**
+- Ranking badges (#1, #2, …) that update with sort
+- Wallet connect simulation (Privy / Injected / WalletConnect)
+- Hire modal with spend cap in $wif, shadow mode, and live blast radius
+- Hover animations and polished dark theme
+- Skeleton session + spend-cap contract: `contracts/RariflatSession.sol`
 
 ---
 
@@ -68,39 +71,42 @@ And everything runs on **$wif** on Robinhood Chain.
 
 ---
 
-## Categories (Robinhood Chain focused)
+## Categories
 
-- Stock Tokens agents
-- $wif Yield & Hooks
+- Stock Tokens
+- $wif Yield
 - Rebalancing
-- Health Factor / Risk
-- Games & Competitions
-- Onboarding & Consumer
+- Health Factor
+- Grid Trading
+- Onboarding
+- Games
 
 ---
 
-## Features
+## Contract skeleton
 
-- Rarity scoring (scarcity + track + consistency + verified + $wif volume)
-- Restraint signal
-- Blast radius preview
-- Shadow mode
-- Spend cap + allowlist + expiry
-- Never a blank-check activation
+See `contracts/RariflatSession.sol`.
+
+It defines:
+- Session creation with spend cap, duration, and shadow mode flag
+- `attemptSpend` that enforces the cap and shadow mode
+- Revoke and remaining balance view
+
+Ready to be deployed and wired on Robinhood Chain with the real $wif token.
 
 ---
 
 ## Status
 
-Full marketplace UI is live in `index.html`.
+Marketplace UI is complete for demo.
+Wallet connect is simulated.
+Contract is a clear skeleton.
 
-Next steps for a complete submission:
-
-- Deploy agent registry / session logic on Robinhood Chain
-- Wire real $wif token (`0x5173b8ea6923c2d40267890d45c46a3480954773`)
-- Live hire + spend-cap enforcement
+Next for a full submission:
+- Deploy `RariflatSession` on Robinhood Chain
+- Wire real $wif allowance + transfer
+- Connect real wallet (Privy or injected)
 - Demo video + real transactions
-- Connect wallet (Privy / injected)
 
 ---
 
