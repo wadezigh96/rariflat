@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rariflat — Rarity Agent Marketplace on Robinhood Chain</title>
+  <style>
+    :root {
+      --bg: #0a0c0a;
+      --card: #121512;
+      --accent: #00ff9d;
+      --text: #e8f0e8;
+      --muted: #8a9a8a;
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+    header { padding: 2rem; border-bottom: 1px solid #222; text-align: center; }
+    h1 { margin: 0; font-size: 2.5rem; letter-spacing: -0.03em; }
+    .tag { color: var(--accent); font-weight: 600; }
+    .sub { color: var(--muted); margin-top: 0.5rem; }
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 1.2rem; }
+    .card h3 { margin: 0 0 0.5rem; }
+    .meta { color: var(--muted); font-size: 0.85rem; }
+    .wif { color: var(--accent); font-weight: 600; }
+    .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Rariflat</h1>
+    <div class="sub">Rarity-ranked agents on <span class="tag">Robinhood Chain</span> · powered by <span class="wif">$wif</span></div>
+  </header>
+  <div class="container">
+    <p>Hire by rarity. Cap spend in $wif. Compare restraint and blast radius before you activate.</p>
+    <div id="grid" class="grid"></div>
+  </div>
+  <div class="footer">
+    Built for World Is Flat Hackathon · $wif 0x5173b8ea6923c2d40267890d45c46a3480954773<br>
+    Open agents-data.js and app logic to extend.
+  </div>
+  <script src="agents-data.js"></script>
+  <script>
+    const grid = document.getElementById('grid');
+    AGENTS.forEach(a => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h3>${a.name}</h3>
+        <div class="meta">${a.cat} · ${a.verified ? 'Verified' : 'Unverified'}</div>
+        <p>${a.desc}</p>
+        <div class="wif">$wif volume: ${(a.wifVolume/1000).toFixed(0)}k</div>
+        <div class="meta">${a.keyLabel}: ${a.keyValue}</div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
