@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rariflat — Rarity Agent Marketplace</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
   <style>
     :root {
       --bg: #070907;
@@ -41,7 +42,6 @@
       transition: all 0.15s;
     }
     .wallet-btn:hover, .wallet-btn.connected { background: var(--accent); color: #041208; }
-    .wallet-btn.connected { border-color: var(--accent); }
 
     .hero { text-align: center; padding: 2.2rem 1rem 1.2rem; }
     .hero h1 { margin: 0 0 0.5rem; font-size: 2.3rem; letter-spacing: -0.03em; }
@@ -120,8 +120,11 @@
       transition: background 0.15s;
     }
     .btn:hover { background: #33ffb0; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 0.45rem; }
     .close { float: right; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; }
+
+    .status { font-size: 0.8rem; color: var(--accent); margin-top: 0.5rem; min-height: 1.2em; }
 
     .flywheel {
       margin-top: 2.2rem; padding: 1.1rem; background: var(--surface); border: 1px solid var(--border);
@@ -177,7 +180,7 @@
 
   <footer>
     Rariflat · Built for World Is Flat Hackathon<br>
-    $wif 0x5173b8ea6923c2d40267890d45c46a3480954773 · Session contract skeleton in <code>contracts/RariflatSession.sol</code>
+    $wif 0x5173b8ea6923c2d40267890d45c46a3480954773 · Set CONTRACT_ADDRESS in js/contract.js after deploy
   </footer>
 
   <!-- Hire Modal -->
@@ -194,16 +197,22 @@
       <div class="signal"><span id="m-keylabel"></span><span class="val" id="m-keyval"></span></div>
 
       <div class="field">
+        <label>Agent address (for session)</label>
+        <input type="text" id="agent-address" placeholder="0x..." value="0x0000000000000000000000000000000000000001">
+      </div>
+      <div class="field">
         <label>Spend cap ($wif)</label>
         <input type="number" id="spend-cap" value="100" min="1" step="1">
       </div>
       <div class="field">
-        <label>Shadow mode (days)</label>
+        <label>Duration (days)</label>
+        <input type="number" id="duration" value="7" min="1" max="30">
+      </div>
+      <div class="field">
+        <label>Shadow mode</label>
         <select id="shadow">
-          <option value="0">Off</option>
-          <option value="1" selected>1 day</option>
-          <option value="3">3 days</option>
-          <option value="7">7 days</option>
+          <option value="false">Off</option>
+          <option value="true" selected>On</option>
         </select>
       </div>
 
@@ -211,7 +220,8 @@
         Blast radius: up to <strong id="blast-val">100</strong> $wif at risk under this cap.
       </div>
 
-      <button class="btn" onclick="hire()">Hire with $wif</button>
+      <button class="btn" id="hireBtn" onclick="hire()">Hire with $wif</button>
+      <div class="status" id="hireStatus"></div>
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
     </div>
   </div>
@@ -221,23 +231,24 @@
     <div class="modal">
       <button class="close" onclick="closeWallet()">&times;</button>
       <h2>Connect Wallet</h2>
-      <p style="color:var(--muted); font-size:0.88rem; margin-top:0.2rem;">Simulation for demo. On Robinhood Chain this would open Privy or an injected wallet.</p>
-      <button class="wallet-option" onclick="connectSim('Privy')">
-        Privy (embedded)
-        <small>Email / social login → embedded wallet</small>
-      </button>
-      <button class="wallet-option" onclick="connectSim('Injected')">
+      <p style="color:var(--muted); font-size:0.88rem; margin-top:0.2rem;">On Robinhood Chain. Simulation available if no wallet.</p>
+      <button class="wallet-option" onclick="connectReal()">
         Injected Wallet
-        <small>MetaMask / Rabby / browser wallet</small>
+        <small>MetaMask / Rabby / browser wallet → real chain switch</small>
+      </button>
+      <button class="wallet-option" onclick="connectSim('Privy')">
+        Simulate Privy
+        <small>Demo only — no real chain</small>
       </button>
       <button class="wallet-option" onclick="connectSim('WalletConnect')">
-        WalletConnect
-        <small>Mobile wallet QR</small>
+        Simulate WalletConnect
+        <small>Demo only</small>
       </button>
     </div>
   </div>
 
   <script src="agents-data.js"></script>
+  <script src="js/contract.js"></script>
   <script>
     let currentFilter = 'All';
     let currentSort = 'rarity';
@@ -322,6 +333,7 @@
       document.getElementById('m-keylabel').textContent = a.keyLabel;
       document.getElementById('m-keyval').textContent = a.keyValue;
       document.getElementById('spend-cap').value = 100;
+      document.getElementById('hireStatus').textContent = '';
       updateBlast();
       document.getElementById('modal').classList.add('open');
     }
@@ -336,16 +348,55 @@
     }
     document.getElementById('spend-cap').addEventListener('input', updateBlast);
 
-    function hire() {
+    async function hire() {
       if (!wallet) {
         alert('Connect a wallet first.');
         openWallet();
         return;
       }
+
+      const status = document.getElementById('hireStatus');
+      const btn = document.getElementById('hireBtn');
       const cap = document.getElementById('spend-cap').value;
-      const shadow = document.getElementById('shadow').value;
-      alert(`Session created (simulated)\n\nAgent: ${selectedAgent.name}\nWallet: ${wallet.type} · ${wallet.address}\nSpend cap: ${cap} $wif\nShadow mode: ${shadow} days\n\nOn Robinhood Chain this would call RariflatSession.createSession() and require $wif allowance.`);
-      closeModal();
+      const days = document.getElementById('duration').value;
+      const shadow = document.getElementById('shadow').value === 'true';
+      const agentAddr = document.getElementById('agent-address').value.trim();
+
+      if (!agentAddr.startsWith('0x') || agentAddr.length < 42) {
+        status.textContent = 'Invalid agent address';
+        return;
+      }
+
+      // If simulated wallet, just show confirmation
+      if (wallet.simulated) {
+        status.textContent = `Simulated session created for ${selectedAgent.name} · ${cap} $wif · ${days}d · shadow=${shadow}`;
+        return;
+      }
+
+      // Real wallet path
+      btn.disabled = true;
+      status.textContent = 'Approving $wif...';
+      try {
+        const capWei = ethers.parseUnits(cap.toString(), 18);
+        const duration = Number(days) * 24 * 60 * 60;
+
+        await window.RariflatContract.approveWif(capWei);
+        status.textContent = 'Creating session on-chain...';
+
+        const result = await window.RariflatContract.createSession({
+          agent: agentAddr,
+          spendCapWei: capWei,
+          durationSeconds: duration,
+          shadowMode: shadow
+        });
+
+        status.textContent = `Session created! id: ${result.id || 'see tx'} · tx: ${result.txHash?.slice(0,10)}...`;
+      } catch (err) {
+        console.error(err);
+        status.textContent = 'Error: ' + (err.shortMessage || err.message || 'failed');
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     function openWallet() {
@@ -355,9 +406,24 @@
       document.getElementById('walletModal').classList.remove('open');
     }
 
+    async function connectReal() {
+      try {
+        const provider = await window.RariflatContract.getProvider();
+        const signer = await provider.getSigner();
+        const addr = await signer.getAddress();
+        wallet = { type: 'injected', address: addr, simulated: false };
+        const btn = document.getElementById('walletBtn');
+        btn.textContent = addr.slice(0,6) + '...' + addr.slice(-4);
+        btn.classList.add('connected');
+        closeWallet();
+      } catch (err) {
+        alert(err.message || 'Failed to connect');
+      }
+    }
+
     function connectSim(type) {
       const addr = '0x' + Math.random().toString(16).slice(2, 10) + '...' + Math.random().toString(16).slice(2, 6);
-      wallet = { type, address: addr };
+      wallet = { type, address: addr, simulated: true };
       const btn = document.getElementById('walletBtn');
       btn.textContent = addr;
       btn.classList.add('connected');
